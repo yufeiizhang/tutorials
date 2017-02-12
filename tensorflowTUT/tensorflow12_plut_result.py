@@ -2,16 +2,19 @@
 
 # Youtube video tutorial: https://www.youtube.com/channel/UCdyjiB5H8Pu7aDTNVXTTpcg
 # Youku video tutorial: http://i.youku.com/pythontutorial
-
+# pylint: disable=C0103, I0011, C0303, E1101
 """
-Please note, this code is only for python 3+. If you are using python 2+, please modify the code accordingly.
+Please note, this code is only for python 3+. 
+If you are using python 2+, please modify the code accordingly.
 """
 from __future__ import print_function
 import tensorflow as tf
 import numpy as np
+# 输出模块
 import matplotlib.pyplot as plt
 
 def add_layer(inputs, in_size, out_size, activation_function=None):
+    '''add layer'''
     # add one more layer and return the output of this layer
     Weights = tf.Variable(tf.random_normal([in_size, out_size]))
     biases = tf.Variable(tf.zeros([1, out_size]) + 0.1)
@@ -23,7 +26,7 @@ def add_layer(inputs, in_size, out_size, activation_function=None):
     return outputs
 
 # Make up some real data
-x_data = np.linspace(-1,1,300)[:, np.newaxis]
+x_data = np.linspace(-1, 1, 300)[:, np.newaxis]
 noise = np.random.normal(0, 0.05, x_data.shape)
 y_data = np.square(x_data) - 0.5 + noise
 
@@ -51,24 +54,39 @@ sess = tf.Session()
 sess.run(init)
 
 # plot the real data
+# 先生成图片框
 fig = plt.figure()
-ax = fig.add_subplot(1,1,1)
+# 这里好像是用单独的subplot实现的
+ax = fig.add_subplot(1, 1, 1)
+# 首先绘制真实的图片
 ax.scatter(x_data, y_data)
+# show之后可以不暂停，继续主程序... 
 plt.ion()
+# show只能plot一次...会把程序暂停
 plt.show()
 
 for i in range(1000):
     # training
     sess.run(train_step, feed_dict={xs: x_data, ys: y_data})
     if i % 50 == 0:
+        # 每50步输出一次
         # to visualize the result and improvement
+        # 抹掉之前的线...
+        # 这里的写法好机智...如果是第一次的话直接except就好了。wow
         try:
             ax.lines.remove(lines[0])
         except Exception:
             pass
+        # 通过run prediction得到prediction_value
+        # 这里和之前sess.run(train_step,..)不一样的是...
+        # 这里和loss不一样的是，prediction只需要给出x_data即可
+        # 根据之前prediction依赖l1，l1依赖x_data（hidden和output layer）
+        # 如果在这里给出l1会怎么样呢？
         prediction_value = sess.run(prediction, feed_dict={xs: x_data})
         # plot the prediction
+        # 绘制prediction的结果（线宽为5）
         lines = ax.plot(x_data, prediction_value, 'r-', lw=5)
+        # 等一段时间....。
         plt.pause(0.1)
 
 
