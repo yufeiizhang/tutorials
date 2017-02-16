@@ -2,9 +2,11 @@
 
 # Youtube video tutorial: https://www.youtube.com/channel/UCdyjiB5H8Pu7aDTNVXTTpcg
 # Youku video tutorial: http://i.youku.com/pythontutorial
+# pylint: disable=C0103, I0011, C0303, E1101
 
 """
-Please note, this code is only for python 3+. If you are using python 2+, please modify the code accordingly.
+Please note, this code is only for python 3+. 
+If you are using python 2+, please modify the code accordingly.
 """
 from __future__ import print_function
 import tensorflow as tf
@@ -13,22 +15,45 @@ from tensorflow.examples.tutorials.mnist import input_data
 mnist = input_data.read_data_sets('MNIST_data', one_hot=True)
 
 def compute_accuracy(v_xs, v_ys):
+    '''
+    compute accuracy
+    需要输出准确率
+    '''
     global prediction
     y_pre = sess.run(prediction, feed_dict={xs: v_xs, keep_prob: 1})
-    correct_prediction = tf.equal(tf.argmax(y_pre,1), tf.argmax(v_ys,1))
+    correct_prediction = tf.equal(tf.argmax(y_pre, 1), tf.argmax(v_ys, 1))
     accuracy = tf.reduce_mean(tf.cast(correct_prediction, tf.float32))
     result = sess.run(accuracy, feed_dict={xs: v_xs, ys: v_ys, keep_prob: 1})
     return result
 
 def weight_variable(shape):
+    '''
+    输入shape, 返回参数
+    normal distribution生成随机变量
+    输入即是mean对应的shape
+    '''
+    # 这里truncated normal生成的随机数是不包含0的（据说）
     initial = tf.truncated_normal(shape, stddev=0.1)
+    # 这里variable似乎确实只要给输入就可以了，
+    # 不过这一段，就不能直接返回initial么？
+    # 毕竟之前已经是在TensorFlow中操作了。
     return tf.Variable(initial)
 
 def bias_variable(shape):
+    '''
+    生成bias，
+    shape由参数传入
+    '''
     initial = tf.constant(0.1, shape=shape)
     return tf.Variable(initial)
 
 def conv2d(x, W):
+    '''
+    定义卷积神经网络层
+    二维的卷积网络
+    输入内容即x（图片的所有信息）
+    W是权值，stride对应的是每次卷积运算在几何上的距离（步长）
+    '''
     # stride [1, x_movement, y_movement, 1]
     # Must have strides[0] = strides[3] = 1
     return tf.nn.conv2d(x, W, strides=[1, 1, 1, 1], padding='SAME')
